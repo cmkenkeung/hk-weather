@@ -681,9 +681,13 @@ body.light-theme .forecast-row:hover {
 .forecast-desc {
     font-size: 11px;
     color: var(--text-secondary);
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.4;
+    max-height: 2.8em;
 }
 
 .forecast-temp-range {
