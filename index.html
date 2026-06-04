@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hong Kong District Weather Live Dashboard</title>
+    <meta name="description" content="Real-time weather forecast and district-level environmental conditions across Hong Kong, featuring live temperature, humidity, rainfall, and interactive geographic mapping.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+    <div class="background-glows">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar or Header -->
+        <header class="main-header">
+            <div class="header-logo">
+                <i data-lucide="cloud-lightning" class="logo-icon"></i>
+                <div class="logo-text">
+                    <h1>HKWeather<span>.live</span></h1>
+                    <p>Hong Kong Observatory Live Data</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="system-time" id="system-time">
+                    <i data-lucide="clock"></i>
+                    <span id="live-clock">--:--:--</span>
+                </div>
+                
+                <!-- Unit toggle moved to hero section -->
+
+                <button class="refresh-btn" id="refresh-btn" aria-label="Refresh Data">
+                    <i data-lucide="rotate-cw" id="refresh-icon"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Warnings & Alerts Section -->
+        <section class="warnings-section hidden" id="warnings-container">
+            <!-- Dynamic warnings will be inserted here -->
+        </section>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Panel: Current Weather & Hero Section -->
+            <section class="left-panel">
+                <div class="weather-hero-card card">
+                    <div class="hero-bg-effect"></div>
+                    <div class="hero-header">
+                        <span class="location-badge">
+                            <i data-lucide="map-pin"></i>
+                            <span id="current-location-text">Hong Kong Observatory</span>
+                        </span>
+                        <span class="last-updated" id="last-updated-text">Updated: --:--</span>
+                    </div>
+                    
+                    <div class="hero-body">
+                        <div class="hero-main-info">
+                            <div class="temp-display" style="display: flex; align-items: center; gap: 15px;">
+                                <span class="temp-value" id="hero-temp">--</span>
+                                <div class="toggle-container hero-toggle">
+                                    <button class="unit-toggle" id="unit-toggle" aria-label="Toggle Temperature Unit" style="transform: scale(1.2); transform-origin: left center;">
+                                        <span class="unit active" data-unit="C">°C</span>
+                                        <span class="unit" data-unit="F">°F</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="weather-condition-container">
+                                <div class="condition-icon-wrapper" id="hero-condition-icon">
+                                    <i data-lucide="cloud" class="weather-icon-large"></i>
+                                </div>
+                                <span class="condition-text" id="hero-condition-text">Loading...</span>
+                            </div>
+                        </div>
+
+                        <div class="weather-meta-grid">
+                            <div class="meta-item">
+                                <i data-lucide="droplets" class="meta-icon humidity"></i>
+                                <div class="meta-label-group">
+                                    <span class="meta-value" id="hero-humidity">--%</span>
+                                    <span class="meta-label">Humidity</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <i data-lucide="umbrella" class="meta-icon rainfall"></i>
+                                <div class="meta-label-group">
+                                    <span class="meta-value" id="hero-rainfall">0.0 mm</span>
+                                    <span class="meta-label">Max Rainfall</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <i data-lucide="sun" class="meta-icon uv"></i>
+                                <div class="meta-label-group">
+                                    <span class="meta-value" id="hero-uv">--</span>
+                                    <span class="meta-label">UV Index</span>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <i data-lucide="wind" class="meta-icon wind"></i>
+                                <div class="meta-label-group">
+                                    <span class="meta-value" id="hero-wind">Calm</span>
+                                    <span class="meta-label">Wind speed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9-Day Forecast Section -->
+                <div class="forecast-section card">
+                    <div class="section-header">
+                        <h2>9-Day Forecast</h2>
+                        <p>Weekly outlook & rain probabilities</p>
+                    </div>
+                    
+                    <div class="forecast-carousel-wrapper">
+                        <div class="forecast-carousel" id="forecast-carousel">
+                            <!-- Dynamic forecast cards -->
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: District Weather & Mapping -->
+            <section class="right-panel">
+                <div class="district-weather-card card">
+                    <div class="district-header">
+                        <div class="district-header-text">
+                            <h2>District Conditions</h2>
+                            <p>Temperature & Rainfall across 18 districts</p>
+                        </div>
+                        
+                        <div class="view-selectors">
+                            <button class="view-toggle-btn active" id="view-map-btn" aria-label="Switch to Map Grid View">
+                                <i data-lucide="map"></i>
+                                <span>Geographic Grid</span>
+                            </button>
+                            <button class="view-toggle-btn" id="view-list-btn" aria-label="Switch to List View">
+                                <i data-lucide="list"></i>
+                                <span>Detailed Cards</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter & Search Controls -->
+                    <div class="search-filter-controls">
+                        <div class="search-box">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="district-search" placeholder="Search districts...">
+                        </div>
+                        <div class="filter-pills" id="region-filter-pills">
+                            <button class="filter-pill active" data-region="all">All</button>
+                            <button class="filter-pill" data-region="hongkong">HK Island</button>
+                            <button class="filter-pill" data-region="kowloon">Kowloon</button>
+                            <button class="filter-pill" data-region="nt">New Territories</button>
+                            <button class="filter-pill" data-region="islands">Islands</button>
+                        </div>
+                    </div>
+
+                    <!-- Active Views Container -->
+                    <div class="view-container">
+                        <!-- Geographic Map Grid View -->
+                        <div class="view-pane map-grid-pane active" id="map-grid-view">
+                            <div class="hk-geographic-grid" id="hk-grid-container">
+                                <!-- Districts arranged geographically will be injected here -->
+                            </div>
+                            <div class="map-legend">
+                                <span class="legend-item"><span class="legend-color temp-low"></span> Cold (< 18°C)</span>
+                                <span class="legend-item"><span class="legend-color temp-mid"></span> Mild (18-27°C)</span>
+                                <span class="legend-item"><span class="legend-color temp-high"></span> Hot (> 27°C)</span>
+                                <span class="legend-item"><span class="legend-rain-indicator"></span> Has Rain</span>
+                            </div>
+                        </div>
+
+                        <!-- List/Detailed Cards View -->
+                        <div class="view-pane list-pane" id="list-view">
+                            <div class="districts-detailed-list" id="districts-list-container">
+                                <!-- District cards will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-card card">
+                    <div class="section-header">
+                        <h2>Temperature Trend</h2>
+                        <p>9-day forecast temperature curve (°C)</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="temp-trend-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Detailed Modal for District Info -->
+        <div class="modal-overlay hidden" id="district-modal">
+            <div class="modal-card">
+                <button class="modal-close" id="modal-close-btn" aria-label="Close modal">
+                    <i data-lucide="x"></i>
+                </button>
+                <div class="modal-header">
+                    <span class="modal-region-badge" id="modal-district-region">New Territories</span>
+                    <h3 id="modal-district-name">Sha Tin District</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-primary-stats">
+                        <div class="modal-stat-box">
+                            <span class="stat-lbl">Temperature</span>
+                            <span class="stat-val" id="modal-district-temp">--°C</span>
+                            <span class="stat-sub" id="modal-temp-station">Recorded at Sha Tin Station</span>
+                        </div>
+                        <div class="modal-stat-box">
+                            <span class="stat-lbl">Rainfall (Past Hour)</span>
+                            <span class="stat-val" id="modal-district-rain">-- mm</span>
+                            <span class="stat-sub">Max District Rainfall</span>
+                        </div>
+                    </div>
+                    <div class="modal-station-details">
+                        <h4>Nearby Weather Stations & Reading Sources</h4>
+                        <div class="station-readings-list" id="modal-station-readings">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Data provided by the Open Data API of the Hong Kong Observatory. Designed with premium analytics & glassmorphic layout.</p>
+            <p class="copyright">&copy; 2026 HKWeather.live. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
